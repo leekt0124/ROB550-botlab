@@ -14,7 +14,7 @@ int main(int argc, char** argv)
     pose_xyt_t nextPose;
     
     nextPose.x = 0.0f;
-    nextPose.y = 0.0f;
+    nextPose.y = 0.2f;
     nextPose.theta = M_PI_2;
     path.path[0] = nextPose;
     

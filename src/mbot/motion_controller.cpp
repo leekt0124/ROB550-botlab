@@ -42,11 +42,12 @@ public:
         float dy = target.y - pose.y;
         float d = pow((pow(dx, 2.0) + pow(dy, 2.0)), 0.5);
         float alpha = atan2(dy, dx) - pose.theta;
+        // float d = (alpha > M_PI_2 || alpha < -M_PI_2) ? -pow((pow(dx, 2.0) + pow(dy, 2.0)), 0.5) : pow((pow(dx, 2.0) + pow(dy, 2.0)), 0.5);
         std::cout << "straight\n";
         std::cout << "target x: " << target.x << ", target y: " << target.y << ", target theta: " << target.theta << "\n";
         std::cout << "pose x: " << pose.x << ", pose y: " << pose.y << ", pose theta: " << pose.theta << "\n";
         std::cout << dx << " " << dy << " " << d << " " << alpha << "\n";
-        return {0, 1 * d, 0.01 * alpha};
+        return {0, 0.5 * d, 0.01 * alpha};
         // return {0, 0.1, 0};
     }
 
