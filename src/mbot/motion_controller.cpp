@@ -38,7 +38,16 @@ public:
     StraightManeuverController() = default;   
     virtual mbot_motor_command_t get_command(const pose_xyt_t& pose, const pose_xyt_t& target) override
     {
-        return {0, 0.1, 0};
+        float dx = target.x - pose.x;
+        float dy = target.y - pose.y;
+        float d = pow((pow(dx, 2.0) + pow(dy, 2.0)), 0.5);
+        float alpha = atan2(dy, dx) - pose.theta;
+        std::cout << "straight\n";
+        std::cout << "target x: " << target.x << ", target y: " << target.y << ", target theta: " << target.theta << "\n";
+        std::cout << "pose x: " << pose.x << ", pose y: " << pose.y << ", pose theta: " << pose.theta << "\n";
+        std::cout << dx << " " << dy << " " << d << " " << alpha << "\n";
+        return {0, 1 * d, 0.01 * alpha};
+        // return {0, 0.1, 0};
     }
 
     virtual bool target_reached(const pose_xyt_t& pose, const pose_xyt_t& target)  override
@@ -53,6 +62,15 @@ public:
     TurnManeuverController() = default;   
     virtual mbot_motor_command_t get_command(const pose_xyt_t& pose, const pose_xyt_t& target) override
     {
+        float dx = target.x - pose.x;
+        float dy = target.y - pose.y;
+        float d = pow((pow(dx, 2.0) + pow(dy, 2.0)), 0.5);
+        float alpha = atan2(dy, dx) - pose.theta;
+        std::cout << "turn\n";
+        std::cout << dx << " " << dy << " " << d << " " << alpha << "\n";
+        std::cout << "target x: " << target.x << ", target y: " << target.y << ", target theta: " << target.theta << "\n";
+        std::cout << "pose x: " << pose.x << ", pose y: " << pose.y << ", pose theta: " << pose.theta << "\n";
+        // return {0, 0, 1 * alpha};
         return {0, 0, 0.5};
     }
 
@@ -61,7 +79,7 @@ public:
         float dx = target.x - pose.x;
         float dy = target.y - pose.y;
         float target_heading = atan2(dy, dx);
-        return (fabs(angle_diff(pose.theta, target_heading)) < 0.07);
+        return (fabs(angle_diff(pose.theta, target_heading)) < 0.01);
     }
 };
 

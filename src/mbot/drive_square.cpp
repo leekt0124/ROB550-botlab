@@ -15,34 +15,37 @@ int main(int argc, char** argv)
         numTimes = std::atoi(argv[1]);
     }
     
-    std::cout << "Commanding robot to drive around 1m square " << numTimes << " times.\n";
+    std::cout << "Commanding robot to drive around 0.5m square " << numTimes << " times.\n";
     
     robot_path_t path;
     path.path.resize(numTimes * 4);
     
     pose_xyt_t nextPose;
     
-    nextPose.x = 1.0f;
+    nextPose.x = 0.5f;
     nextPose.y = 0.0f;
     nextPose.theta = M_PI_2;
     for(int n = 0; n < numTimes; ++n)
     {
+        std::cout << "step 1";
         path.path[4*n] = nextPose;
     }
     
-    nextPose.x = 1.0f;
-    nextPose.y = 1.0f;
+    nextPose.x = 0.5f;
+    nextPose.y = 0.5f;
     nextPose.theta = 0;
     for(int n = 0; n < numTimes; ++n)
     {
+        std::cout << "step 2";
         path.path[4*n + 1] = nextPose;
     }
     
     nextPose.x = 0.0f;
-    nextPose.y = 1.0f;
+    nextPose.y = 0.5f;
     nextPose.theta = -M_PI;
     for(int n = 0; n < numTimes; ++n)
     {
+        std::cout << "step 3";
         path.path[4*n + 2] = nextPose;
     }
     
@@ -51,6 +54,7 @@ int main(int argc, char** argv)
     nextPose.theta = -M_PI_2;
     for(int n = 0; n < numTimes; ++n)
     {
+        std::cout << "step 4";
         path.path[4*n + 3] = nextPose;
     }
     
