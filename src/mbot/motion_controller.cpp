@@ -47,13 +47,13 @@ public:
         std::cout << "target x: " << target.x << ", target y: " << target.y << ", target theta: " << target.theta << "\n";
         std::cout << "pose x: " << pose.x << ", pose y: " << pose.y << ", pose theta: " << pose.theta << "\n";
         std::cout << dx << " " << dy << " " << d << " " << alpha << "\n";
-        return {0, 0.5 * d, 0.01 * alpha};
-        // return {0, 0.1, 0};
+        // return {0, 0.5 * d, 0.01 * alpha};
+        return {0, 0.5 * d, 0.1 * alpha};
     }
 
     virtual bool target_reached(const pose_xyt_t& pose, const pose_xyt_t& target)  override
     {
-        return ((fabs(pose.x - target.x) < 0.1) && (fabs(pose.y - target.y)  < 0.1));
+        return ((fabs(pose.x - target.x) < 0.05) && (fabs(pose.y - target.y)  < 0.05));
     }
 };
 
@@ -68,9 +68,13 @@ public:
         float d = pow((pow(dx, 2.0) + pow(dy, 2.0)), 0.5);
         float alpha = atan2(dy, dx) - pose.theta;
         std::cout << "turn\n";
-        std::cout << dx << " " << dy << " " << d << " " << alpha << "\n";
-        std::cout << "target x: " << target.x << ", target y: " << target.y << ", target theta: " << target.theta << "\n";
-        std::cout << "pose x: " << pose.x << ", pose y: " << pose.y << ", pose theta: " << pose.theta << "\n";
+        // std::cout << dx << " " << dy << " " << d << " " << alpha << "\n";
+        // std::cout << "target x: " << target.x << ", target y: " << target.y << ", target theta: " << target.theta << "\n";
+        // std::cout << "pose x: " << pose.x << ", pose y: " << pose.y << ", pose theta: " << pose.theta << "\n";
+
+
+        float target_heading = atan2(dy, dx);
+        std::cout << "pose.theta = " << pose.theta << " " << "target_heading = " << target_heading << std::endl;
         // return {0, 0, 1 * alpha};
         return {0, 0, 0.5};
     }
@@ -122,6 +126,7 @@ public:
             ///////  TODO: Add different states when adding maneuver controls /////// 
             if(state_ == TURN)
             { 
+                std::cout << "in TURN" << std::endl;
                 if(turn_controller.target_reached(pose, target))
                 {
 		            state_ = DRIVE;
@@ -133,6 +138,8 @@ public:
             }
             else if(state_ == DRIVE) 
             {
+                std::cout << "in DRIVE" << std::endl;
+                std::cout << targets_.size() << std::endl;
                 if(straight_controller.target_reached(pose, target))
                 {
                     if(!assignNextTarget())
