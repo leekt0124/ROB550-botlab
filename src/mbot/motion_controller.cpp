@@ -17,6 +17,11 @@
 #include <signal.h>
 #include "maneuver_controller.h"
 
+#define f_Kp 1
+#define f_Kw 1.5
+#define r_Kw 1
+
+
 /////////////////////// TODO: /////////////////////////////
 /**
  * Code below is a little more than a template. You will need
@@ -41,20 +46,37 @@ public:
         float dx = target.x - pose.x;
         float dy = target.y - pose.y;
         float d = pow((pow(dx, 2.0) + pow(dy, 2.0)), 0.5);
-        float alpha = atan2(dy, dx) - pose.theta;
+        // float alpha = atan2(dy, dx) - pose.theta;
+        float alpha = angle_diff(atan2(dy, dx), pose.theta);
+        // int sign = 1;
+        // // if 
         // float d = (alpha > M_PI_2 || alpha < -M_PI_2) ? -pow((pow(dx, 2.0) + pow(dy, 2.0)), 0.5) : pow((pow(dx, 2.0) + pow(dy, 2.0)), 0.5);
-        std::cout << "straight\n";
+        // std::cout << "straight\n";
         std::cout << "target x: " << target.x << ", target y: " << target.y << ", target theta: " << target.theta << "\n";
         std::cout << "pose x: " << pose.x << ", pose y: " << pose.y << ", pose theta: " << pose.theta << "\n";
-        std::cout << dx << " " << dy << " " << d << " " << alpha << "\n";
+        std::cout << dx << " " << dy << " " << d << " " << alpha << atan2(dy, dx) << "\n";
         // return {0, 0.5 * d, 0.01 * alpha};
-        return {0, 0.5 * d, 0.1 * alpha};
+        float f_out = f_Kp * d;
+        if (f_out >= 0.75) {
+            f_out = 0.75;
+        }
+        return {0, f_out, f_Kw * alpha};
+        // return {0, 0.25, f_Kw * alpha};
     }
 
     virtual bool target_reached(const pose_xyt_t& pose, const pose_xyt_t& target)  override
     {
         return ((fabs(pose.x - target.x) < 0.05) && (fabs(pose.y - target.y)  < 0.05));
     }
+
+    // float mb_angle_diff_radians(float angle1, float angle2)
+    // {
+    //     float diff = angle1 - angle2;
+    //     while(diff < -M_PI) diff+=2.0*M_PI;
+    //     while(diff > M_PI) diff-=2.0*M_PI;
+    //     return diff;
+    // }
+
 };
 
 class TurnManeuverController : public ManeuverControllerBase
@@ -66,17 +88,19 @@ public:
         float dx = target.x - pose.x;
         float dy = target.y - pose.y;
         float d = pow((pow(dx, 2.0) + pow(dy, 2.0)), 0.5);
-        float alpha = atan2(dy, dx) - pose.theta;
-        std::cout << "turn\n";
+        // float alpha = atan2(dy, dx) - pose.theta;
+        float alpha = angle_diff(atan2(dy, dx), pose.theta);
+        // std::cout << "turn\n";
         // std::cout << dx << " " << dy << " " << d << " " << alpha << "\n";
         // std::cout << "target x: " << target.x << ", target y: " << target.y << ", target theta: " << target.theta << "\n";
         // std::cout << "pose x: " << pose.x << ", pose y: " << pose.y << ", pose theta: " << pose.theta << "\n";
 
 
         float target_heading = atan2(dy, dx);
+        std::cout << atan2(1.01, 0.01) << std::endl;
         std::cout << "pose.theta = " << pose.theta << " " << "target_heading = " << target_heading << std::endl;
         // return {0, 0, 1 * alpha};
-        return {0, 0, 0.5};
+        return {0, 0, r_Kw * alpha};
     }
 
     virtual bool target_reached(const pose_xyt_t& pose, const pose_xyt_t& target)  override
@@ -84,8 +108,17 @@ public:
         float dx = target.x - pose.x;
         float dy = target.y - pose.y;
         float target_heading = atan2(dy, dx);
-        return (fabs(angle_diff(pose.theta, target_heading)) < 0.01);
+        return (fabs(angle_diff(pose.theta, target_heading)) < 0.06);
     }
+
+    // float mb_angle_diff_radians(float angle1, float angle2)
+    // {
+    //     float diff = angle1 - angle2;
+    //     while(diff < -M_PI) diff+=2.0*M_PI;
+    //     while(diff > M_PI) diff-=2.0*M_PI;
+    //     return diff;
+    // }
+
 };
 
 
@@ -138,8 +171,8 @@ public:
             }
             else if(state_ == DRIVE) 
             {
-                std::cout << "in DRIVE" << std::endl;
-                std::cout << targets_.size() << std::endl;
+                // std::cout << "in DRIVE" << std::endl;
+                // std::cout << targets_.size() << std::endl;
                 if(straight_controller.target_reached(pose, target))
                 {
                     if(!assignNextTarget())

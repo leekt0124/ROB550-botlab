@@ -22,7 +22,7 @@ int main(int argc, char** argv)
     
     pose_xyt_t nextPose;
     
-    nextPose.x = 0.5f;
+    nextPose.x = 0.8f;
     nextPose.y = 0.0f;
     nextPose.theta = M_PI_2;
     for(int n = 0; n < numTimes; ++n)
@@ -31,8 +31,8 @@ int main(int argc, char** argv)
         path.path[4*n] = nextPose;
     }
     
-    nextPose.x = 0.5f;
-    nextPose.y = 0.5f;
+    nextPose.x = 0.8f;
+    nextPose.y = 0.8f;
     nextPose.theta = 0;
     for(int n = 0; n < numTimes; ++n)
     {
@@ -41,7 +41,7 @@ int main(int argc, char** argv)
     }
     
     nextPose.x = 0.0f;
-    nextPose.y = 0.5f;
+    nextPose.y = 0.8f;
     nextPose.theta = -M_PI;
     for(int n = 0; n < numTimes; ++n)
     {
