@@ -61,8 +61,8 @@ public:
         std::cout << dx << " " << dy << " " << d << " " << alpha << atan2(dy, dx) << "\n";
         // return {0, 0.5 * d, 0.01 * alpha};
         float f_out = f_Kp * d;
-        if (f_out >= 0.6) {
-            f_out = 0.6;
+        if (f_out >= 0.5) {
+            f_out = 0.5;
         }
         return {0, f_out, f_Kw * alpha};
         // return {0, 0.25, f_Kw * alpha};
@@ -70,7 +70,7 @@ public:
 
     virtual bool target_reached(const pose_xyt_t& pose, const pose_xyt_t& target)  override
     {
-        return ((fabs(pose.x - target.x) < 0.07) && (fabs(pose.y - target.y)  < 0.07));
+        return ((fabs(pose.x - target.x) < 0.03) && (fabs(pose.y - target.y)  < 0.03));
     }
 
     // float mb_angle_diff_radians(float angle1, float angle2)
