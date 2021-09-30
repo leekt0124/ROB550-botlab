@@ -17,8 +17,12 @@
 #include <signal.h>
 #include "maneuver_controller.h"
 
+// #define f_Kp 1
+// #define f_Kw 1.5
+// #define r_Kw 1
+
 #define f_Kp 1
-#define f_Kw 1.5
+#define f_Kw 1
 #define r_Kw 1
 
 
@@ -57,8 +61,8 @@ public:
         std::cout << dx << " " << dy << " " << d << " " << alpha << atan2(dy, dx) << "\n";
         // return {0, 0.5 * d, 0.01 * alpha};
         float f_out = f_Kp * d;
-        if (f_out >= 0.75) {
-            f_out = 0.75;
+        if (f_out >= 0.6) {
+            f_out = 0.6;
         }
         return {0, f_out, f_Kw * alpha};
         // return {0, 0.25, f_Kw * alpha};
@@ -66,7 +70,7 @@ public:
 
     virtual bool target_reached(const pose_xyt_t& pose, const pose_xyt_t& target)  override
     {
-        return ((fabs(pose.x - target.x) < 0.05) && (fabs(pose.y - target.y)  < 0.05));
+        return ((fabs(pose.x - target.x) < 0.07) && (fabs(pose.y - target.y)  < 0.07));
     }
 
     // float mb_angle_diff_radians(float angle1, float angle2)
