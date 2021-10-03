@@ -56,9 +56,9 @@ public:
         // // if 
         // float d = (alpha > M_PI_2 || alpha < -M_PI_2) ? -pow((pow(dx, 2.0) + pow(dy, 2.0)), 0.5) : pow((pow(dx, 2.0) + pow(dy, 2.0)), 0.5);
         // std::cout << "straight\n";
-        std::cout << "target x: " << target.x << ", target y: " << target.y << ", target theta: " << target.theta << "\n";
-        std::cout << "pose x: " << pose.x << ", pose y: " << pose.y << ", pose theta: " << pose.theta << "\n";
-        std::cout << dx << " " << dy << " " << d << " " << alpha << atan2(dy, dx) << "\n";
+        //std::cout << "target x: " << target.x << ", target y: " << target.y << ", target theta: " << target.theta << "\n";
+        //std::cout << "pose x: " << pose.x << ", pose y: " << pose.y << ", pose theta: " << pose.theta << "\n";
+        //std::cout << dx << " " << dy << " " << d << " " << alpha << atan2(dy, dx) << "\n";
         // return {0, 0.5 * d, 0.01 * alpha};
         float f_out = f_Kp * d;
         if (f_out >= 0.5) {
@@ -100,9 +100,9 @@ public:
         // std::cout << "pose x: " << pose.x << ", pose y: " << pose.y << ", pose theta: " << pose.theta << "\n";
 
 
-        float target_heading = atan2(dy, dx);
-        std::cout << atan2(1.01, 0.01) << std::endl;
-        std::cout << "pose.theta = " << pose.theta << " " << "target_heading = " << target_heading << std::endl;
+        //float target_heading = atan2(dy, dx);
+        //std::cout << atan2(1.01, 0.01) << std::endl;
+        //std::cout << "pose.theta = " << pose.theta << " " << "target_heading = " << target_heading << std::endl;
         // return {0, 0, 1 * alpha};
         return {0, 0, r_Kw * alpha};
     }
@@ -163,7 +163,7 @@ public:
             ///////  TODO: Add different states when adding maneuver controls /////// 
             if(state_ == TURN)
             { 
-                std::cout << "in TURN" << std::endl;
+                //std::cout << "in TURN" << std::endl;
                 if(turn_controller.target_reached(pose, target))
                 {
 		            state_ = DRIVE;
