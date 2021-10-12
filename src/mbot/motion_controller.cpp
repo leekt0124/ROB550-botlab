@@ -21,7 +21,7 @@
 // #define f_Kw 1.5
 // #define r_Kw 1
 
-#define f_Kp 1
+#define f_Kp 0.5
 #define f_Kw 1
 #define r_Kw 1
 

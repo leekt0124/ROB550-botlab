@@ -78,8 +78,8 @@ void Mapping::scoreRay(const adjusted_ray_t& ray, OccupancyGrid& map){
 }
 void Mapping::decreaseCellOdds(int x, int y, OccupancyGrid& map){
     
-    if(std::numeric_limits<CellOdds>::min()+kHitOdds_ < map(x,y)){
-        map(x,y) -= kHitOdds_;
+    if(std::numeric_limits<CellOdds>::min()+kMissOdds_ < map(x,y)){
+        map(x,y) -= kMissOdds_;
     }
     else{
         map(x,y) = std::numeric_limits<CellOdds>::min();
