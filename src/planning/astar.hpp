@@ -3,8 +3,128 @@
 
 #include <lcmtypes/robot_path_t.hpp>
 #include <lcmtypes/pose_xyt_t.hpp>
-
+#include <queue>
+#include <vector>
+typedef Point<int> cell_t;
 class ObstacleDistanceGrid;
+
+struct Node
+{
+    Node(int x, int y):cell(x,y), g_cost(0.0), h_cost(0.0), parent(NULL){}
+    cell_t cell;
+    Node* parent;
+    double h_cost;
+    double g_cost;
+    double f_cost(void) const {return g_cost + h_cost;}
+
+    bool operator==(const Node& rhs) const
+    {
+        return (cell == rhs.cell);
+    }
+
+    bool is_in_list(NodeList nodelist){
+        return nodelist.is_member(cell);
+    }
+
+    bool is_in_map(const ObstacleDistanceGrid& map){
+        int width = map.widthInCells();
+        int height = map.heightInCells();
+        return (cell.x >=0 && cell.y>=0 && cell.x<width && cell.y<height);
+    }
+
+    bool is_obstacle(const ObstacleDistanceGrid& map){
+        return map(cell.x, cell.y)  < 3 * map.metersPerCell();
+    }
+
+    bool is_free(const ObstacleDistanceGrid& map){
+        return map(cell.x, cell.y)  >= 3 * map.metersPerCell();
+    }
+};
+
+struct NodeList
+{
+    std::vector<Node*> nodes;
+    void put(Node* node){
+        nodes.push_back(node);
+    }
+    Node* get(cell_t cell){
+        for(auto& node : nodes){
+            if(cell==node->cell)
+                return node;
+        }
+        return nullptr;
+    }
+    bool is_member(cell_t cell){
+        for(auto& node : nodes){
+            if(cell==node->cell)
+                return true;
+        }
+        return false;
+    }
+
+};
+
+
+struct CompareNode
+{
+    bool operator() (Node* n1, Node* n2){
+        if(n1->f_cost() == n2->f_cost()){
+            return n1->h_cost > n2->h_cost;
+        }
+        else{
+            return (n1->f_cost() > n2->f_cost());
+        }
+    }
+};
+
+struct PriorityQueue
+{
+    std::priority_queue<Node* , std::vector<Node*>, CompareNode> Q;
+    std::vector<Node*> elements;
+
+    bool empty(){
+        return Q.empty();
+    }
+
+    bool is_member(Node* n){
+        for(auto node: elements){
+            if(*n == *node){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    Node* get_member(Node* n){
+        for(auto node: elements){
+            if(*n == *node){
+                return node;
+            }
+        }
+        return NULL;
+    }
+
+    void push(Node* n){
+        elements.push_back(n);
+        Q.push(n);
+    }
+    
+    Node* pop(){
+        int idx = -1;
+        Node* n = Q.top();
+        Q.pop();
+        for(int i=0; i<elements.size(); i++){
+            if(elements[i] == n){
+                idx = i;
+                break;
+            }
+        }
+        elements.erase(elements.begin() + idx);
+        return n;
+    }
+
+};
+
 
 /**
 * SearchParams defines the parameters to use when searching for a path. See associated comments for details
@@ -23,6 +143,12 @@ struct SearchParams
                                     ///< for cellDistance > minDistanceToObstacle && cellDistance < maxDistanceWithCost
 };
 
+
+double h_cost(Node* from, Node* goal);
+double g_cost(Node* from, Node* to, const ObstacleDistanceGrid& distances, const SearchParams& params);
+std::vector<Node*> expand_node(Node* node, ObstacleDistanceGrid& distances, const SearchParams& params);
+std::vector<Node*> extract_node_path(Node* node);
+std::vector<pose_xyt_t> extract_pose_path(std::vector<Node*> nodePath, const ObstacleDistanceGrid& distances);
 
 /**
 * search_for_path uses an A* search to find a path from the start to goal poses. The search assumes a circular robot
