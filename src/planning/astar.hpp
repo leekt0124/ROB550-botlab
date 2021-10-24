@@ -38,8 +38,8 @@ struct Node
     }
 
     bool is_obstacle(const ObstacleDistanceGrid& map, double mindist){
-        // return map(cell.x, cell.y)  == 0;
         std::cout << "distance  : "  << map(cell.x, cell.y) << " " << mindist << std::endl;
+        if(map(cell.x, cell.y) == -1) return false;
         return map(cell.x, cell.y)  < mindist;
         // return false;
     }

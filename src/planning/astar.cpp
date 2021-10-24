@@ -26,6 +26,7 @@ robot_path_t search_for_path(pose_xyt_t start,
                              const SearchParams& params)
 {
     ////////////////// TODO: Implement your A* search here //////////////////////////
+    std::cout << "fuck 1" << std::endl;
     int map_width = distances.widthInCells();
     int map_height = distances.heightInCells();
     Point<double> startPoint;
@@ -51,7 +52,9 @@ robot_path_t search_for_path(pose_xyt_t start,
     path.utime = start.utime;
     path.path_length = path.path.size();
 
-    if(!(current_node->is_in_map(distances) && !current_node->is_obstacle(distances, params.minDistanceToObstacle)))
+    std::cout << "fuck 2" << std::endl;
+
+    if((!current_node->is_in_map(distances) || current_node->is_obstacle(distances, params.minDistanceToObstacle)))
         return path;
 
     while(!(*current_node==goal_node)){
@@ -86,7 +89,8 @@ void expand_node(Node* node, const ObstacleDistanceGrid& distances, const Search
     // std::cout << "curr node = " << node->cell.x << " " << node->cell.y << std::endl;
     for(int i=0; i<8; i++){
         cell_t cell(node->cell.x + xDeltas[i], node->cell.y + yDeltas[i]);
-        std::cout<<cell.x<<" "<<cell.y<<std::endl;
+        // std::cout<<cell.x<<" "<<cell.y<<std::endl;
+        // hi
         Node* neighbor;
         if(searched_list.is_member(cell))
             neighbor = searched_list.get(cell);
@@ -96,7 +100,8 @@ void expand_node(Node* node, const ObstacleDistanceGrid& distances, const Search
         // std::cout<< !closed_list.is_member(neighbor->cell)<<std::endl;
         // std::cout<< neighbor->is_in_map(distances) << std::endl;
         // std::cout<< !neighbor->is_obstacle(distances, params.minDistanceToObstacle) <<std::endl;
-        if (true || !closed_list.is_member(neighbor->cell) && neighbor->is_in_map(distances) && !neighbor->is_obstacle(distances, params.minDistanceToObstacle)) {
+        // std::cout << "fuck 3" << std::endl;
+        if (!closed_list.is_member(neighbor->cell) && neighbor->is_in_map(distances) && !neighbor->is_obstacle(distances, params.minDistanceToObstacle)) {
             if (!searched_list.is_member(neighbor->cell)) {
                 neighbor->g_cost = g_cost(neighbor, node);
                 neighbor->h_cost = h_cost(neighbor, &goal_node);
