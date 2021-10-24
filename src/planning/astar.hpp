@@ -3,6 +3,7 @@
 
 #include <lcmtypes/robot_path_t.hpp>
 #include <lcmtypes/pose_xyt_t.hpp>
+#include <planning/obstacle_distance_grid.hpp>
 #include <queue>
 #include <vector>
 typedef Point<int> cell_t;
@@ -22,9 +23,9 @@ struct Node
         return (cell == rhs.cell);
     }
 
-    bool is_in_list(NodeList nodelist){
-        return nodelist.is_member(cell);
-    }
+    // bool is_in_list(NodeList nodelist){
+    //     return nodelist.is_member(cell);
+    // }
 
     bool is_in_map(const ObstacleDistanceGrid& map){
         int width = map.widthInCells();
@@ -33,11 +34,13 @@ struct Node
     }
 
     bool is_obstacle(const ObstacleDistanceGrid& map){
-        return map(cell.x, cell.y)  < 3 * map.metersPerCell();
+        return map(cell.x, cell.y)  == 0;
+        // return map(cell.x, cell.y)  < 3 * map.metersPerCell();
     }
 
     bool is_free(const ObstacleDistanceGrid& map){
-        return map(cell.x, cell.y)  >= 3 * map.metersPerCell();
+        return map(cell.x, cell.y)  > 0;
+        // return map(cell.x, cell.y)  >= 3 * map.metersPerCell();
     }
 };
 
@@ -146,9 +149,9 @@ struct SearchParams
 
 double h_cost(Node* from, Node* goal);
 double g_cost(Node* from, Node* to, const ObstacleDistanceGrid& distances, const SearchParams& params);
-std::vector<Node*> expand_node(Node* node, ObstacleDistanceGrid& distances, const SearchParams& params);
-std::vector<Node*> extract_node_path(Node* node);
-std::vector<pose_xyt_t> extract_pose_path(std::vector<Node*> nodePath, const ObstacleDistanceGrid& distances);
+void expand_node(Node* node, const ObstacleDistanceGrid& distances, const SearchParams& params, NodeList& closed_list, NodeList& searched_list, PriorityQueue open_list, Node& goal_node);
+void extract_pose_path(Node* node, robot_path_t& path, Node& start_node, int64_t utime);
+//std::vector<pose_xyt_t> extract_pose_path(std::vector<Node*> nodePath, const ObstacleDistanceGrid& distances);
 
 /**
 * search_for_path uses an A* search to find a path from the start to goal poses. The search assumes a circular robot
