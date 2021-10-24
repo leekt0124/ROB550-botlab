@@ -25,6 +25,7 @@ robot_path_t search_for_path(pose_xyt_t start,
                              const SearchParams& params)
 {
     ////////////////// TODO: Implement your A* search here //////////////////////////
+    std::cout<<"fuck      fuck" << std::endl;
     int map_width = distances.widthInCells();
     int map_height = distances.heightInCells();
     Node start_node(start.x, start.y);
@@ -32,9 +33,11 @@ robot_path_t search_for_path(pose_xyt_t start,
     PriorityQueue open_list;
     NodeList closed_list;
     NodeList searched_list;
-    
+
+    open_list.push(&start_node);
     Node* current_node = open_list.pop();
     while(!(*current_node==goal_node)){
+        std::cout<<"not a fuck1" <<std::endl;
         closed_list.put(current_node);
         expand_node(current_node, distances, params, closed_list, searched_list, open_list, goal_node);
         current_node = open_list.pop();
@@ -48,7 +51,7 @@ robot_path_t search_for_path(pose_xyt_t start,
     return path;
 }
 
-void expand_node(Node* node, ObstacleDistanceGrid& distances, const SearchParams& params, NodeList& closed_list, NodeList& searched_list, PriorityQueue open_list, Node& goal_node){
+void expand_node(Node* node, const ObstacleDistanceGrid& distances, const SearchParams& params, NodeList& closed_list, NodeList& searched_list, PriorityQueue open_list, Node& goal_node){
     const int xDeltas[8] = {1, 1, 0, 1, 0, -1, -1, -1};
     const int yDeltas[8] = {0, 1, -1, -1, 1, 1, 0, -1};
     for(int i=0; i<8; i++){
@@ -78,13 +81,14 @@ void expand_node(Node* node, ObstacleDistanceGrid& distances, const SearchParams
     }
 }
 
-void extract_node_path(Node* node, robot_path_t& path, Node& start_node, int64_t utime){
+void extract_pose_path(Node* node, robot_path_t& path, Node& start_node, int64_t utime){
     Node* current_node = node;
     while(!(*current_node == start_node)){
         pose_xyt_t pose;
         pose.utime = utime;
         pose.x = current_node->cell.x;
         pose.y = current_node->cell.y;
+        std::cout<<pose.x<< " "<<pose.y<<std::endl;
         pose.theta = 0.0;
         path.path.push_back(pose);
         current_node = current_node->parent;
