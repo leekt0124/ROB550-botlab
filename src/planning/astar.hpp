@@ -30,18 +30,24 @@ struct Node
     bool is_in_map(const ObstacleDistanceGrid& map){
         int width = map.widthInCells();
         int height = map.heightInCells();
-        return (cell.x >=0 && cell.y>=0 && cell.x<width && cell.y<height);
+        //std::cout << "In is in map";
+        //std::cout << "width = " << width << "height = " << height << "x = " << cell.x << "y = " << cell.y << std::endl;
+        // return (cell.x >=0 && cell.y>=0 && cell.x<width && cell.y<height);
+        return map.isCellInGrid(cell.x, cell.y);
+        // return true;
     }
 
-    bool is_obstacle(const ObstacleDistanceGrid& map){
-        return map(cell.x, cell.y)  == 0;
-        // return map(cell.x, cell.y)  < 3 * map.metersPerCell();
+    bool is_obstacle(const ObstacleDistanceGrid& map, double mindist){
+        // return map(cell.x, cell.y)  == 0;
+        std::cout << "distance  : "  << map(cell.x, cell.y) << " " << mindist << std::endl;
+        return map(cell.x, cell.y)  < mindist;
+        // return false;
     }
 
-    bool is_free(const ObstacleDistanceGrid& map){
-        return map(cell.x, cell.y)  > 0;
-        // return map(cell.x, cell.y)  >= 3 * map.metersPerCell();
-    }
+    // bool is_free(const ObstacleDistanceGrid& map){
+    //     // return map(cell.x, cell.y)  > 0;
+    //     return map(cell.x, cell.y)  >= 3;
+    // }
 };
 
 struct NodeList
@@ -59,7 +65,7 @@ struct NodeList
     }
     bool is_member(cell_t cell){
         for(auto& node : nodes){
-            if(cell==node->cell)
+            if((cell.x==node->cell.x)&&(cell.y==node->cell.y))
                 return true;
         }
         return false;
@@ -149,8 +155,8 @@ struct SearchParams
 
 double h_cost(Node* from, Node* goal);
 double g_cost(Node* from, Node* to, const ObstacleDistanceGrid& distances, const SearchParams& params);
-void expand_node(Node* node, const ObstacleDistanceGrid& distances, const SearchParams& params, NodeList& closed_list, NodeList& searched_list, PriorityQueue open_list, Node& goal_node);
-void extract_pose_path(Node* node, robot_path_t& path, Node& start_node, int64_t utime);
+void expand_node(Node* node, const ObstacleDistanceGrid& distances, const SearchParams& params, NodeList& closed_list, NodeList& searched_list, PriorityQueue& open_list, Node& goal_node);
+void extract_pose_path(Node* node, const ObstacleDistanceGrid& distances, robot_path_t& path, Node& start_node, int64_t utime);
 //std::vector<pose_xyt_t> extract_pose_path(std::vector<Node*> nodePath, const ObstacleDistanceGrid& distances);
 
 /**

@@ -95,14 +95,14 @@ void ObstacleDistanceGrid::expand_node(const DistanceNode& node, ObstacleDistanc
     const int yDeltas[8] = {0, 1, -1, -1, 1, 1, 0, -1};
     const float diagnol = std::sqrt(2);
     for(int i=0; i<8; i++){
-        if(i%2==1) continue;
+        //if(i%2==1) continue;
         cell_t adjacentCell(node.cell.x + xDeltas[i],  node.cell.y + yDeltas[i]);
         if(grid.isCellInGrid(adjacentCell.x, adjacentCell.y)){
             if(grid(adjacentCell.x, adjacentCell.y) == -1){
                 
                 DistanceNode adjacentNode(adjacentCell, node.distance + 1.0);
-                if(i%2==1)
-                    adjacentNode.distance = node.distance + diagnol;
+                // if(i%2==1)
+                //    adjacentNode.distance = node.distance + diagnol;
 
                 grid(adjacentCell.x, adjacentCell.y) = adjacentNode.distance * grid.metersPerCell();
                 searchQueue.push(adjacentNode);

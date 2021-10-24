@@ -1,6 +1,7 @@
 #include <planning/astar.hpp>
 #include <planning/obstacle_distance_grid.hpp>
 #include <algorithm>
+#include <common/grid_utils.hpp>
 
 double h_cost(Node* from, Node* goal) {
     int dx = std::abs(goal->cell.x - from->cell.x);
@@ -25,11 +26,20 @@ robot_path_t search_for_path(pose_xyt_t start,
                              const SearchParams& params)
 {
     ////////////////// TODO: Implement your A* search here //////////////////////////
-    std::cout<<"fuck      fuck" << std::endl;
     int map_width = distances.widthInCells();
     int map_height = distances.heightInCells();
-    Node start_node(start.x, start.y);
-    Node goal_node(goal.x, goal.y);
+    Point<double> startPoint;
+    startPoint.x = start.x;
+    startPoint.y = start.y;
+    cell_t startCell = global_position_to_grid_cell(startPoint, distances);
+
+    Point<double> goalPoint;
+    goalPoint.x = goal.x;
+    goalPoint.y = goal.y;
+    cell_t goalCell = global_position_to_grid_cell(goalPoint, distances);
+
+    Node start_node(startCell.x, startCell.y);
+    Node goal_node(goalCell.x, goalCell.y);
     PriorityQueue open_list;
     NodeList closed_list;
     NodeList searched_list;
@@ -37,32 +47,49 @@ robot_path_t search_for_path(pose_xyt_t start,
     open_list.push(&start_node);
     Node* current_node = open_list.pop();
     while(!(*current_node==goal_node)){
-        std::cout<<"not a fuck1" <<std::endl;
+        // std::cout<<"not a fuck1" <<std::endl;
         closed_list.put(current_node);
         expand_node(current_node, distances, params, closed_list, searched_list, open_list, goal_node);
+        // std::cout<<"pop test : "<<open_list.pop()->cell.x << " "<<open_list.pop()->cell.y<<std::endl;
+        // int i = 0;
+        // while (i < 100) {
+        //     std::cout << "pop count = " << i << std::endl;
+        //     Node* temp_node = open_list.pop();
+        //     std::cout << temp_node->cell.x << " " << temp_node->cell.y << std::endl;
+        //     ++i;
+        // }
         current_node = open_list.pop();
     }
 
     robot_path_t path;
     path.utime = start.utime;
-    extract_pose_path(current_node, path, start_node, path.utime);
+    extract_pose_path(current_node, distances, path, start_node, path.utime);
     //path.path.push_back(start);    
     path.path_length = path.path.size();
     return path;
 }
 
-void expand_node(Node* node, const ObstacleDistanceGrid& distances, const SearchParams& params, NodeList& closed_list, NodeList& searched_list, PriorityQueue open_list, Node& goal_node){
+void expand_node(Node* node, const ObstacleDistanceGrid& distances, const SearchParams& params, NodeList& closed_list, NodeList& searched_list, PriorityQueue& open_list, Node& goal_node){
     const int xDeltas[8] = {1, 1, 0, 1, 0, -1, -1, -1};
     const int yDeltas[8] = {0, 1, -1, -1, 1, 1, 0, -1};
+    // std::cout << "curr queue = ";
+    // for (int i = 0; i < open_list.Q.size(); ++i) {
+    //     std::cout << 
+    // } 
+    // std::cout << "curr node = " << node->cell.x << " " << node->cell.y << std::endl;
     for(int i=0; i<8; i++){
         cell_t cell(node->cell.x + xDeltas[i], node->cell.y + yDeltas[i]);
+        std::cout<<cell.x<<" "<<cell.y<<std::endl;
         Node* neighbor;
         if(searched_list.is_member(cell))
             neighbor = searched_list.get(cell);
         else
             neighbor = new Node(cell.x, cell.y);
-
-        if (!closed_list.is_member(neighbor->cell) && neighbor->is_in_map(distances) && !neighbor->is_obstacle(distances)) {
+        // std::cout<<"----------------------------\n";
+        // std::cout<< !closed_list.is_member(neighbor->cell)<<std::endl;
+        // std::cout<< neighbor->is_in_map(distances) << std::endl;
+        // std::cout<< !neighbor->is_obstacle(distances, params.minDistanceToObstacle) <<std::endl;
+        if (!closed_list.is_member(neighbor->cell) && neighbor->is_in_map(distances) && !neighbor->is_obstacle(distances, params.minDistanceToObstacle)) {
             if (!searched_list.is_member(neighbor->cell)) {
                 neighbor->g_cost = g_cost(neighbor, node);
                 neighbor->h_cost = h_cost(neighbor, &goal_node);
@@ -81,14 +108,21 @@ void expand_node(Node* node, const ObstacleDistanceGrid& distances, const Search
     }
 }
 
-void extract_pose_path(Node* node, robot_path_t& path, Node& start_node, int64_t utime){
+void extract_pose_path(Node* node, const ObstacleDistanceGrid& distances, robot_path_t& path, Node& start_node, int64_t utime){
     Node* current_node = node;
     while(!(*current_node == start_node)){
+        Point<double> temp;
+        temp.x = current_node->cell.x;
+        temp.y = current_node->cell.y;
+
+        
+        Point<double> temp2 = grid_position_to_global_position(temp, distances);
+        
         pose_xyt_t pose;
         pose.utime = utime;
-        pose.x = current_node->cell.x;
-        pose.y = current_node->cell.y;
-        std::cout<<pose.x<< " "<<pose.y<<std::endl;
+        pose.x = temp2.x;
+        pose.y = temp2.y;
+        // std::cout<<pose.x<< " "<<pose.y<<std::endl;
         pose.theta = 0.0;
         path.path.push_back(pose);
         current_node = current_node->parent;
