@@ -102,13 +102,13 @@ robot_path_t plan_path_to_frontier(const std::vector<frontier_t>& frontiers,
     robot_path_t emptyPath;
     double minDistanceToRobot = -1.0;
     pose_xyt_t targetPose;
-    float cellsPerMeter = map.cellsPerMeter();
+    // float cellsPerMeter = map.cellsPerMeter();
     
     for(auto frontier : frontiers)
     {
         double distanceToRobot = 0;
-        int sum_x = 0;
-        int sum_y = 0;
+        float sum_x = 0;
+        float sum_y = 0;
         double num_cells = 0;
 
         for(auto fcell : frontier.cells)
@@ -116,9 +116,10 @@ robot_path_t plan_path_to_frontier(const std::vector<frontier_t>& frontiers,
             sum_x += fcell.x;
             sum_y += fcell.y;
             num_cells += 1;
+            std::cout << "x= " << fcell.x << " y=" << fcell.y << std::endl;
         }
-        double target_x = double(sum_x) * cellsPerMeter / num_cells;
-        double target_y = double(sum_y) * cellsPerMeter / num_cells;
+        double target_x = double(sum_x) / num_cells;
+        double target_y = double(sum_y) / num_cells;
 
         distanceToRobot = std::sqrt(pow(target_x - robotPose.x, 2) + pow(target_y - robotPose.y, 2));
 
@@ -130,6 +131,8 @@ robot_path_t plan_path_to_frontier(const std::vector<frontier_t>& frontiers,
         }
         
     }
+    std::cout << "robotPose = " << robotPose.x << " " << robotPose.y << std::endl;
+    std::cout << "targetPose = " << targetPose.x << " " << targetPose.y << std::endl;
     emptyPath = planner.planPath(robotPose , targetPose);
     if(emptyPath.path_length > 3)
     {

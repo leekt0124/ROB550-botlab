@@ -25,6 +25,7 @@ robot_path_t MotionPlanner::planPath(const pose_xyt_t& start,
                                      const SearchParams& searchParams) const
 {
     // If the goal isn't valid, then no path can actually exist
+    std::cout << "goal = " << goal.x << " " << goal.y << std::endl; 
     if(!isValidGoal(goal))
     {
         robot_path_t failedPath;
