@@ -85,6 +85,73 @@ std::vector<frontier_t> find_map_frontiers(const OccupancyGrid& map,
     return frontiers;
 }
 
+pose_xyt_t frontier_to_feasible_cell(const pose_xyt_t& frontierPose, 
+                                   const pose_xyt_t& robotPose,
+                                   const OccupancyGrid& map)
+{
+    //// find the nearest feasible free cell from the frontier, to get a valid goal
+    pose_xyt_t targetPose;
+    
+/*
+    * To find frontiers, we use a connected components search in the occupancy grid. Each connected components consists
+    * only of cells where is_frontier_cell returns true. We scan the grid until an unvisited frontier cell is
+    * encountered, then we grow that frontier until all connected cells are found. We then continue scanning through the
+    * grid. This algorithm can also perform very fast blob detection if you change is_frontier_cell to some other check
+    * based on pixel color or another condition amongst pixels.
+    */
+    // std::vector<frontier_t> frontiers;
+    std::set<Point<int>> visitedCells;
+    Point<int> frontierCell = global_position_to_grid_cell(Point<float>(FrontierPose.x, FrontierPose.y), map);;
+    
+    // Point<int> robotCell = global_position_to_grid_cell(Point<float>(robotPose.x, robotPose.y), map);
+    std::queue<Point<int>> cellQueue;
+    cellQueue.push(frontierCell);
+    visitedCells.insert(frontierCell);
+  
+    // Use a 4-way connected check for expanding through free space.
+    const int kNumNeighbors = 4;
+    const int xDeltas[] = { -1, 1, 0, 0 };
+    const int yDeltas[] = { 0, 0, 1, -1 };
+    
+    // Do a simple BFS to find all connected free space cells and thus avoid unreachable frontiers
+    while(!cellQueue.empty())
+    {
+        Point<int> nextCell = cellQueue.front();
+        cellQueue.pop();
+        
+        // Check each neighbor to see if it is also a frontier
+        for(int n = 0; n < kNumNeighbors; ++n)
+        {
+            Point<int> neighbor(nextCell.x + xDeltas[n], nextCell.y + yDeltas[n]);
+            
+            // If the cell has been visited or isn't in the map, then skip it
+            if(visitedCells.find(neighbor) != visitedCells.end() || !map.isCellInGrid(neighbor.x, neighbor.y))
+            {
+                continue;
+            }
+            // If it is a free cell, then return that free cell
+            else if(map(neighbor.x, neighbor.y) < 0)
+            {
+                targetPose.x = neighbor.x * map.metersPerCell() + map.originInGlobalFrame().x;
+                targetPose.y = neighbor.y * map.metersPerCell() + map.originInGlobalFrame().y;
+                               
+            }
+            // If it is a occupied cell, then keep finding
+            else if(map(neighbor.x, neighbor.y) > 0)
+            {
+                visitedCells.insert(neighbor);
+                cellQueue.push(neighbor);
+            }
+            // skip other unknown cells
+            else
+            {
+                continue;
+            }
+        }
+    }
+    //when no valid goal ?
+    return targetPose;
+}
 
 robot_path_t plan_path_to_frontier(const std::vector<frontier_t>& frontiers, 
                                    const pose_xyt_t& robotPose,
@@ -101,6 +168,7 @@ robot_path_t plan_path_to_frontier(const std::vector<frontier_t>& frontiers,
     */
     robot_path_t emptyPath;
     double minDistanceToRobot = -1.0;
+    pose_xyt_t targetFrontierPose;
     pose_xyt_t targetPose;
     // float cellsPerMeter = map.cellsPerMeter();
     
@@ -126,13 +194,18 @@ robot_path_t plan_path_to_frontier(const std::vector<frontier_t>& frontiers,
         if(minDistanceToRobot < 0 || minDistanceToRobot > distanceToRobot)
         {
             minDistanceToRobot = distanceToRobot;
-            targetPose.x = target_x;
-            targetPose.y = target_y;
+            targetFrontierPose.x = target_x;
+            targetFrontierPose.y = target_y;
         }
         
     }
     std::cout << "robotPose = " << robotPose.x << " " << robotPose.y << std::endl;
+    std::cout << "targetFrontierPose = " << targetFrontierPose.x << " " << targetFrontierPose.y << std::endl;
+
+    targetpose = frontier_to_feasible_cell(frontiers)
+
     std::cout << "targetPose = " << targetPose.x << " " << targetPose.y << std::endl;
+
     emptyPath = planner.planPath(robotPose , targetPose);
     if(emptyPath.path_length > 3)
     {

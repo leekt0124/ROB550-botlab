@@ -49,7 +49,12 @@ std::vector<frontier_t> find_map_frontiers(const OccupancyGrid& map,
 * \param    map                 Map being explored
 * \param    planner             Planner to use for finding the next frontier
 * \return   Path to the selected frontier or a path indicating failure, as described above.
+
 */
+pose_xyt_t frontier_to_feasible_cell(const pose_xyt_t& frontierPose,
+                                   const pose_xyt_t& robotPose,
+                                   const OccupancyGrid& map);
+
 robot_path_t plan_path_to_frontier(const std::vector<frontier_t>& frontiers, 
                                    const pose_xyt_t& robotPose,
                                    const OccupancyGrid& map,
