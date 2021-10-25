@@ -100,6 +100,42 @@ robot_path_t plan_path_to_frontier(const std::vector<frontier_t>& frontiers,
     *       be able to drive straight to a frontier cell, but will need to drive somewhere close.
     */
     robot_path_t emptyPath;
+    double minDistanceToRobot = -1.0;
+    pose_xyt_t targetPose;
+    float cellsPerMeter = map.cellsPerMeter();
+    
+    for(auto frontier : frontiers)
+    {
+        double distanceToRobot = 0;
+        int sum_x = 0;
+        int sum_y = 0;
+        double num_cells = 0;
+
+        for(auto fcell : frontier.cells)
+        {
+            sum_x += fcell.x;
+            sum_y += fcell.y;
+            num_cells += 1;
+        }
+        double target_x = double(sum_x) * cellsPerMeter / num_cells;
+        double target_y = double(sum_y) * cellsPerMeter / num_cells;
+
+        distanceToRobot = std::sqrt(pow(target_x - robotPose.x, 2) + pow(target_y - robotPose.y, 2));
+
+        if(minDistanceToRobot < 0 || minDistanceToRobot > distanceToRobot)
+        {
+            minDistanceToRobot = distanceToRobot;
+            targetPose.x = target_x;
+            targetPose.y = target_y;
+        }
+        
+    }
+    emptyPath = planner.planPath(robotPose , targetPose);
+    if(emptyPath.path_length > 3)
+    {
+        emptyPath.path.resize(3);
+        emptyPath.path_length = 3;
+    }
     
     return emptyPath;
 }
