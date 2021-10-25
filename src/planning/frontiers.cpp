@@ -101,7 +101,7 @@ pose_xyt_t frontier_to_feasible_cell(const pose_xyt_t& frontierPose,
     */
     // std::vector<frontier_t> frontiers;
     std::set<Point<int>> visitedCells;
-    Point<int> frontierCell = global_position_to_grid_cell(Point<float>(FrontierPose.x, FrontierPose.y), map);;
+    Point<int> frontierCell = global_position_to_grid_cell(Point<float>(frontierPose.x, frontierPose.y), map);;
     
     // Point<int> robotCell = global_position_to_grid_cell(Point<float>(robotPose.x, robotPose.y), map);
     std::queue<Point<int>> cellQueue;
@@ -202,7 +202,7 @@ robot_path_t plan_path_to_frontier(const std::vector<frontier_t>& frontiers,
     std::cout << "robotPose = " << robotPose.x << " " << robotPose.y << std::endl;
     std::cout << "targetFrontierPose = " << targetFrontierPose.x << " " << targetFrontierPose.y << std::endl;
 
-    targetpose = frontier_to_feasible_cell(frontiers)
+    targetPose = frontier_to_feasible_cell(targetFrontierPose, robotPose, map);
 
     std::cout << "targetPose = " << targetPose.x << " " << targetPose.y << std::endl;
 
