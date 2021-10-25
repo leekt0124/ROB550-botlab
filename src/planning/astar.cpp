@@ -26,7 +26,6 @@ robot_path_t search_for_path(pose_xyt_t start,
                              const SearchParams& params)
 {
     ////////////////// TODO: Implement your A* search here //////////////////////////
-    std::cout << "fuck 1" << std::endl;
     int map_width = distances.widthInCells();
     int map_height = distances.heightInCells();
     Point<double> startPoint;
@@ -52,13 +51,11 @@ robot_path_t search_for_path(pose_xyt_t start,
     path.utime = start.utime;
     path.path_length = path.path.size();
 
-    std::cout << "fuck 2" << std::endl;
 
     if((!current_node->is_in_map(distances) || current_node->is_obstacle(distances, params.minDistanceToObstacle)))
         return path;
 
     while(!(*current_node==goal_node)){
-        // std::cout<<"not a fuck1" <<std::endl;
         closed_list.put(current_node);
         expand_node(current_node, distances, params, closed_list, searched_list, open_list, goal_node);
         // std::cout<<"pop test : "<<open_list.pop()->cell.x << " "<<open_list.pop()->cell.y<<std::endl;
@@ -97,10 +94,10 @@ void expand_node(Node* node, const ObstacleDistanceGrid& distances, const Search
         else
             neighbor = new Node(cell.x, cell.y);
         // std::cout<<"----------------------------\n";
+
         // std::cout<< !closed_list.is_member(neighbor->cell)<<std::endl;
         // std::cout<< neighbor->is_in_map(distances) << std::endl;
         // std::cout<< !neighbor->is_obstacle(distances, params.minDistanceToObstacle) <<std::endl;
-        // std::cout << "fuck 3" << std::endl;
         if (!closed_list.is_member(neighbor->cell) && neighbor->is_in_map(distances) && !neighbor->is_obstacle(distances, params.minDistanceToObstacle)) {
             if (!searched_list.is_member(neighbor->cell)) {
                 neighbor->g_cost = g_cost(neighbor, node);
