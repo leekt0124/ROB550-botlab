@@ -25,21 +25,27 @@ robot_path_t MotionPlanner::planPath(const pose_xyt_t& start,
                                      const SearchParams& searchParams) const
 {
     // If the goal isn't valid, then no path can actually exist
-    std::cout << "goal = " << goal.x << " " << goal.y << std::endl; 
+    //std::cout << "goal = " << goal.x << " " << goal.y << std::endl;
+    
     if(!isValidGoal(goal))
-    {
+    {   
         robot_path_t failedPath;
         failedPath.utime = utime_now();
         failedPath.path_length = 1;
         failedPath.path.push_back(start);
-
         std::cout << "INFO: path rejected due to invalid goal\n";        
 
         return failedPath;
     }
     
     // Otherwise, use A* to find the path
-    return search_for_path(start, goal, distances_, searchParams);
+    robot_path_t path =  search_for_path(start, goal, distances_, searchParams);
+    if(isPathSafe(path)) 
+        return path;
+    else{
+        path.path.clear();
+        return path;
+    }
 }
 
 
@@ -81,7 +87,16 @@ bool MotionPlanner::isPathSafe(const robot_path_t& path) const
 {
 
     ///////////// TODO: Implement your test for a safe path here //////////////////
-
+    for(auto& p : path.path){
+        Point<double> temp;
+        temp.x = p.x;
+        temp.y = p.y;
+        Point<double> temp2 = global_position_to_grid_cell(temp, distances_);
+        std::cout<<distances_(temp2.x, temp2.y)<<std::endl;
+        if(distances_(temp2.x, temp2.y) == -1) continue;
+        if(distances_(temp2.x, temp2.y) <=  (float)searchParams_.minDistanceToObstacle);
+            return false; 
+    }
     return true;
 }
 

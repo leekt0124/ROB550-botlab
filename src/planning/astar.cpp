@@ -54,19 +54,13 @@ robot_path_t search_for_path(pose_xyt_t start,
 
     if((!current_node->is_in_map(distances) || current_node->is_obstacle(distances, params.minDistanceToObstacle)))
         return path;
-
+    int count = 0;
     while(!(*current_node==goal_node)){
         closed_list.put(current_node);
         expand_node(current_node, distances, params, closed_list, searched_list, open_list, goal_node);
-        // std::cout<<"pop test : "<<open_list.pop()->cell.x << " "<<open_list.pop()->cell.y<<std::endl;
-        // int i = 0;
-        // while (i < 100) {
-        //     std::cout << "pop count = " << i << std::endl;
-        //     Node* temp_node = open_list.pop();
-        //     std::cout << temp_node->cell.x << " " << temp_node->cell.y << std::endl;
-        //     ++i;
-        // }
         current_node = open_list.pop();
+        count++;
+        if(count>100000) return path;
     }
 
     
@@ -79,25 +73,16 @@ robot_path_t search_for_path(pose_xyt_t start,
 void expand_node(Node* node, const ObstacleDistanceGrid& distances, const SearchParams& params, NodeList& closed_list, NodeList& searched_list, PriorityQueue& open_list, Node& goal_node){
     const int xDeltas[8] = {1, 1, 0, 1, 0, -1, -1, -1};
     const int yDeltas[8] = {0, 1, -1, -1, 1, 1, 0, -1};
-    // std::cout << "curr queue = ";
-    // for (int i = 0; i < open_list.Q.size(); ++i) {
-    //     std::cout << 
-    // } 
-    // std::cout << "curr node = " << node->cell.x << " " << node->cell.y << std::endl;
+
     for(int i=0; i<8; i++){
         cell_t cell(node->cell.x + xDeltas[i], node->cell.y + yDeltas[i]);
-        // std::cout<<cell.x<<" "<<cell.y<<std::endl;
-        // hi
+
         Node* neighbor;
         if(searched_list.is_member(cell))
             neighbor = searched_list.get(cell);
         else
             neighbor = new Node(cell.x, cell.y);
-        // std::cout<<"----------------------------\n";
 
-        // std::cout<< !closed_list.is_member(neighbor->cell)<<std::endl;
-        // std::cout<< neighbor->is_in_map(distances) << std::endl;
-        // std::cout<< !neighbor->is_obstacle(distances, params.minDistanceToObstacle) <<std::endl;
         if (!closed_list.is_member(neighbor->cell) && neighbor->is_in_map(distances) && !neighbor->is_obstacle(distances, params.minDistanceToObstacle)) {
             if (!searched_list.is_member(neighbor->cell)) {
                 neighbor->g_cost = g_cost(neighbor, node);
@@ -112,7 +97,6 @@ void expand_node(Node* node, const ObstacleDistanceGrid& distances, const Search
                 open_list.push(neighbor);
             }
         }
-        
 
     }
 }
