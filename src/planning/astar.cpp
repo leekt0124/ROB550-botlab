@@ -60,7 +60,7 @@ robot_path_t search_for_path(pose_xyt_t start,
         expand_node(current_node, distances, params, closed_list, searched_list, open_list, goal_node);
         current_node = open_list.pop();
         count++;
-        if(count>100000) return path;
+        if(count>10000) return path;
     }
 
     
